@@ -7,7 +7,9 @@ RUN apt-get update && apt-get install -y \
     libglib2.0-0 \
     libsm6 \
     libxext6 \
-    libxrender1
+    libxrender1 \
+    libgthread-2.0-0 \
+    libgtk2.0-0
 
 # Set the working directory in the container
 WORKDIR /app
