@@ -2,5 +2,5 @@ Flask
 requests
 opennsfw2==0.14.0
 Pillow
-tensorflow
+tensorflow-cpu
 werkzeug==2.3.6
