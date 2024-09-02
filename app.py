@@ -1,24 +1,15 @@
 from flask import Flask, request, jsonify
 from image_validator import validate_image
 from config import Config
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 
 app = Flask(__name__)
 app.config.from_object(Config)
-
-limiter = Limiter(
-    key_func=get_remote_address,
-    app=app,
-    default_limits=["200 per day", "50 per hour"]
-)
 
 @app.errorhandler(Exception)
 def handle_exception(e):
     return jsonify({"error": "Internal server error"}), 500
 
 @app.route('/validate', methods=['POST'])
-@limiter.limit("10 per minute")
 def validate():
     try:
         if 'image' in request.files:

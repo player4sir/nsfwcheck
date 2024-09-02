@@ -1,6 +1,15 @@
 # Use an official Python runtime as the base image
 FROM python:3.9-slim
 
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    libgl1 \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
+    libgtk2.0-0
+
 # Set the working directory in the container
 WORKDIR /app
 
