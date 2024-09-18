@@ -7,7 +7,7 @@ app.config.from_object(Config)
 
 @app.errorhandler(Exception)
 def handle_exception(e):
-    return jsonify({"error": "Internal server error"}), 500
+    return jsonify({"error": "Internal server error", "message": str(e)}), 500
 
 @app.route('/validate', methods=['POST'])
 def validate():
@@ -26,7 +26,7 @@ def validate():
     except ValueError as e:
         return jsonify({'error': str(e)}), 400
     except Exception as e:
-        return jsonify({'error': 'Error processing request'}), 500
+        return jsonify({'error': 'Error processing request', 'message': str(e)}), 500
 
 @app.route('/health', methods=['GET'])
 def health_check():
