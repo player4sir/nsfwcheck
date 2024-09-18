@@ -12,18 +12,28 @@ RUN apt-get update && apt-get install -y \
     curl && \
     rm -rf /var/lib/apt/lists/*
 
+# 更新 pip 版本
+RUN pip install --upgrade pip
+
+# 添加非 root 用户
+RUN useradd -ms /bin/bash nonroot
+
+# 切换到非 root 用户
+USER nonroot
+
 # 设置工作目录
 WORKDIR /app
+
+# 创建权重目录并下载模型
+RUN mkdir -p /home/nonroot/.opennsfw2/weights && \
+    curl -L -o /home/nonroot/.opennsfw2/weights/open_nsfw_weights.h5 \
+    https://github.com/bhky/opennsfw2/releases/download/v0.1.0/open_nsfw_weights.h5
 
 # 复制 requirements 文件到容器
 COPY requirements.txt .
 
 # 安装 Python 依赖包
 RUN pip install --no-cache-dir -r requirements.txt
-
-# 预下载 opennsfw2 模型权重
-RUN curl -L -o /root/.opennsfw2/weights/open_nsfw_weights.h5 \
-    https://github.com/bhky/opennsfw2/releases/download/v0.1.0/open_nsfw_weights.h5
 
 # 复制代码到容器中
 COPY . .
