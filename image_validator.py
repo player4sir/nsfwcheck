@@ -1,10 +1,13 @@
 import requests
 from io import BytesIO
 from PIL import Image
-from opennsfw2 import predict_image
+from opennsfw2 import make_open_nsfw_model
 from config import Config
 import os
 import tempfile
+
+# 预加载模型
+model = make_open_nsfw_model()
 
 def validate_image(image_data=None, image_url=None):
     temp_file = None
@@ -18,46 +21,37 @@ def validate_image(image_data=None, image_url=None):
         else:
             raise ValueError("Either image_data or image_url must be provided")
 
-        # Validate image format
+        # 验证图像格式
         if image.format.lower() not in Config.ALLOWED_EXTENSIONS:
             raise ValueError(f"Unsupported image format: {image.format}")
 
-        # Convert image to RGB if it's not already
+        # 转换图像为 RGB 格式
         if image.mode != 'RGB':
             image = image.convert('RGB')
 
-        # Save to a temporary file if needed by opennsfw2
+        # 保存到临时文件
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg')
         image.save(temp_file.name, 'JPEG')
-        
-        nsfw_score = predict_image(temp_file.name)
+
+        # 使用模型进行预测
+        nsfw_score = model.predict(temp_file.name)
+
         is_appropriate = is_image_appropriate(nsfw_score, Config.NSFW_THRESHOLD)
-        
-        result = {
+
+        return {
             'is_appropriate': is_appropriate,
             'nsfw_score': float(nsfw_score),
             'threshold': Config.NSFW_THRESHOLD
         }
-
-        return result
 
     except requests.RequestException as e:
         raise ValueError(f"Error fetching image from URL: {str(e)}")
     except Exception as e:
         raise ValueError(f"Error processing image: {str(e)}")
     finally:
-        # Clean up
         if temp_file:
             temp_file.close()
             os.unlink(temp_file.name)
-        
-        # Explicitly delete objects to free memory
-        if 'image' in locals():
-            del image
-        if 'image_data' in locals():
-            del image_data
-        if 'response' in locals():
-            del response
 
 def is_image_appropriate(nsfw_score, threshold):
     return nsfw_score < threshold
