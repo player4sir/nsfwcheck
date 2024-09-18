@@ -1,13 +1,10 @@
 import requests
 from io import BytesIO
 from PIL import Image
-from opennsfw2 import make_open_nsfw_model
+from opennsfw2 import predict_image
 from config import Config
 import os
 import tempfile
-
-# 预加载模型
-model = make_open_nsfw_model()
 
 def validate_image(image_data=None, image_url=None):
     temp_file = None
@@ -33,9 +30,8 @@ def validate_image(image_data=None, image_url=None):
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg')
         image.save(temp_file.name, 'JPEG')
 
-        # 使用模型进行预测
-        nsfw_score = model.predict(temp_file.name)
-
+        # 使用 predict_image 函数进行预测
+        nsfw_score = predict_image(temp_file.name)
         is_appropriate = is_image_appropriate(nsfw_score, Config.NSFW_THRESHOLD)
 
         return {
